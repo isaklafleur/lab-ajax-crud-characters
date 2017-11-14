@@ -2,91 +2,78 @@ const charactersAPI = new APIHandler(
   "http://ih-crud-api.herokuapp.com/characters"
 );
 
-$(document).ready(() => {
-  function addCharacter(char) {
-    $(".characters-container").append(`
+function addCharacter(char) {
+  document.getElementsByClassName("characters-container")[0].innerHTML += `
     <div class="character-info">
-      <div class="name">ID: ${char.id}</div>
-      <div class="name">Name: ${char.name}</div>
-      <div class="occupation">Occupation: ${char.occupation}</div>
-      <div class="debt">Debt: ${char.debt}</div>
-      <div class="weapon">Weapon: ${char.weapon}</div>
-    </div>
-    `);
-  }
-
-  function clearHistory() {
-    $(".characters-container").html("");
-  }
-
-  $("#fetch-all").on("click", e => {
-    charactersAPI.getFullList(response => {
-      clearHistory();
-      // console.log("response", response);
-      response.forEach(character => addCharacter(character));
-    });
+    <div class="name">ID: ${char.id}</div>
+    <div class="name">Name: ${char.name}</div>
+    <div class="occupation">Occupation: ${char.occupation}</div>
+    <div class="debt">Debt: ${char.debt}</div>
+    <div class="weapon">Weapon: ${char.weapon}</div>
+  </div>
+    `;
+}
+document.getElementById("fetch-all").addEventListener("click", () => {
+  charactersAPI.getFullList(response => {
+    document.getElementsByClassName("characters-container")[0].innerHTML = "";
+    response.data.forEach(character => addCharacter(character));
   });
+});
 
-  $("#fetch-one").on("click", e => {
-    const charId = $("input[name='character-id']").val();
-    charactersAPI.getOneRegister(charId, response => {
-      clearHistory();
-      addCharacter(response);
-    });
+document.getElementById("fetch-one").addEventListener("click", () => {
+  const charId = document.getElementById("character-id").value;
+  charactersAPI.getOneRegister(charId, response => {
+    document.getElementsByClassName("characters-container")[0].innerHTML = "";
+    addCharacter(response.data);
   });
+});
 
-  $("#delete-one").on("click", e => {
-    const charId = $("input[name='character-id-delete']").val();
-    charactersAPI.deleteOneRegister(charId, response => {
-      // console.log(response.error);
-      if (response.error) {
-        $("#delete-one").css("background.color", "red");
-      } else {
-        $("#delete-one").css("background.color", "green");
-      }
-    });
+document.getElementById("delete-one").addEventListener("click", () => {
+  const charId = document.getElementById("character-id-delete").value;
+  charactersAPI.deleteOneRegister(charId, response => {
+    if (response.error) {
+      document.getElementById("delete-one").style.backgroundColor = "red";
+    } else {
+      document.getElementById("delete-one").style.backgroundColor = "green";
+    }
   });
+});
 
-  $("#edit-character-form").on("submit", e => {
-    e.preventDefault();
-    const charId = $("#edit-character-form input[name=chr-id]").val();
-    const char = {
-      name: $("#edit-character-form input[name=name]").val(),
-      occupation: $("#edit-character-form input[name=occupation]").val(),
-      weapon: $("#edit-character-form input[name=weapon]").val(),
-      debt: $(
-        "#edit-character-form input[type=checkbox][name=debt]:checked"
-      ).val()
-    };
-    charactersAPI.updateOneRegister(charId, char, response => {
-      if (response.error) {
-        $("#edit-character-form button").css("background-color", "red");
-      } else {
-        $("#edit-character-form button").css("background-color", "green");
-        clearHistory();
-        addCharacter(response);
-      }
-    });
+document.getElementById("btn-update").addEventListener("click", e => {
+  e.preventDefault();
+  const charId = document.getElementById("chr-id").value;
+  const char = {
+    name: document.getElementById("name-update").value,
+    occupation: document.getElementById("occupation-update").value,
+    weapon: document.getElementById("weapon-update").value,
+    debt: document.getElementById("debt-update").checked
+  };
+  charactersAPI.updateOneRegister(charId, char, response => {
+    if (response.error) {
+      document.getElementById("btn-update").style.backgroundColor = "red";
+    } else {
+      document.getElementById("btn-update").style.backgroundColor = "green";
+      document.getElementsByClassName("characters-container")[0].innerHTML = "";
+      addCharacter(response.data);
+    }
   });
+});
 
-  $("#new-character-form").on("submit", e => {
-    e.preventDefault();
-    const characterInfo = {
-      name: $("#new-character-form input[name=name]").val(),
-      occupation: $("#new-character-form input[name=occupation]").val(),
-      weapon: $("#new-character-form input[name=weapon]").val(),
-      debt: $(
-        "#new-character-form input[type=checkbox][name=debt]:checked"
-      ).val()
-    };
-    charactersAPI.createOneRegister(characterInfo, response => {
-      if (response.error) {
-        $("#new-character-form button").css("background-color", "red");
-      } else {
-        $("#new-character-form button").css("background-color", "green");
-        clearHistory();
-        addCharacter(response);
-      }
-    });
+document.getElementById("btn-create").addEventListener("click", e => {
+  e.preventDefault();
+  const characterInfo = {
+    name: document.getElementById("name-new").value,
+    occupation: document.getElementById("occupation-new").value,
+    weapon: document.getElementById("weapon-new").value,
+    debt: document.getElementById("debt-new").checked
+  };
+  charactersAPI.createOneRegister(characterInfo, response => {
+    if (response.error) {
+      document.getElementById("btn-create").style.backgroundColor = "red";
+    } else {
+      document.getElementById("btn-create").style.backgroundColor = "green";
+      document.getElementsByClassName("characters-container")[0].innerHTML = "";
+      addCharacter(response.data);
+    }
   });
 });
